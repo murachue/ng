@@ -1,3 +1,6 @@
+# coding: utf-8
+
+# cities.dat country -> ISO3166 country
 ccmap = {
 "ANTIGUA & B" => "ANTIGUA AND BARBUDA",
 "BOLIVIA" => "BOLIVIA, PLURINATIONAL STATE OF",
@@ -44,19 +47,34 @@ ccmap = {
 "ZAIRE" => "CONGO, THE DEMOCRATIC REPUBLIC OF THE", # ?
 }
 
-# http://www.iso.org/iso/home/standards/country_codes/country_names_and_code_elements_txt.htm
+# http://www.iso.org/iso/home/standards/country_codes/country_names_and_code_elements_txt.htm ...is dead at most 2018/11/25
+# https://raw.githubusercontent.com/mrdragonraaar/CountryCodes/master/iso-3166/country_names_and_code_elements.txt
 isocc = {}
-open("iplist/country_names_and_code_elements_txt.htm","r"){|f|f.gets;while s=f.gets;country,cc = s.chomp.split(";");isocc[country]=cc;end}
+open(ARGV[0],"r") { |f|
+	f.gets
+	begin
+		while s = f.gets
+			country, cc = s.chomp.split(";")
+			isocc[country] = cc
+		end
+	rescue
+		$stderr.puts "at countries line #{f.lineno}"
+		raise
+	end
+}
 
 output = ""
-open("cities.dat", "r") do |f|
-	while s = f.gets
-		s.chomp!
-		city, country, x, y, popul, ismetro = s.split("\t")
-		cc = ccmap[country.upcase] || country # convert from old-name to new-name
-		cc = isocc[cc.upcase] || cc # convert from long-name to two-chars-name
-		output += "#{x}\t#{y}\t#{popul}\t#{ismetro}\t#{cc}\t#{city}\n"
+open(ARGV[1], "r") do |f|
+	begin
+		while s = f.gets
+			s.chomp!
+			city, country, x, y, popul, ismetro = s.split(/[\t ]{2,}/)
+			cc = ccmap[country.upcase] || country   # convert from old-name to new-name
+			cc = isocc[cc.upcase] || cc   # convert from long-name to two-chars-name
+			puts [x, y, popul, ismetro, cc, city].join("\t")
+		end
+	rescue
+		$stderr.puts "at cities line #{f.lineno}"
+		raise
 	end
 end
-# only when everything goes well, over-write out.
-open("data/cities.dat", "w") { |g| g.write output }
