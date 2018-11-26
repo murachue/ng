@@ -5812,6 +5812,7 @@ void initGlobe()
 			gGlobe.coasts[gGlobe.ccoasts].cpoints++;
 		}
 	}
+	gGlobe.ccoasts++;
 	fclose(fp);
 
 	lts = sprintf(ts, "Loading international.dat");
@@ -5844,6 +5845,7 @@ void initGlobe()
 			gGlobe.interns[gGlobe.cinterns].cpoints++;
 		}
 	}
+	gGlobe.cinterns++;
 	fclose(fp);
 
 	lts = sprintf(ts, "Loading iplist.dat       ");
@@ -5880,12 +5882,15 @@ void initGlobe()
 				lc = (lc + 1) % 4;
 				XDrawImageString(X.disp, X.wnd, X.gc, 5, X.wh - 5, tts, lts);
 
-				for(i = 0; i < gGlobe.ccities; i++)
-					if(!strcmp(gGlobe.cities[i].country, co) && gGlobe.cities[i].ismetro)
-					{
-						gGlobe.ips[gGlobe.cips].cid = i;
-						break;
+				if(co != NULL) { /* if not reserved (~= assigned) */
+					for(i = 0; i < gGlobe.ccities; i++) {
+						if(!strcmp(gGlobe.cities[i].country, co) && gGlobe.cities[i].ismetro)
+						{
+							gGlobe.ips[gGlobe.cips].cid = i;
+							break;
+						}
 					}
+				}
 
 				//if(i == gGlobe.ccities)
 				//	printf("Unable to bind %s\n", co);
