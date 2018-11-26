@@ -773,7 +773,7 @@ typedef unsigned long ulong;
 
 struct
 {
-	bool runode;
+	int runode;
 	bool showinfo;
 
 	int maxhop;
@@ -3575,12 +3575,14 @@ int cmdColor(int argc, char **argv)
 			{
 				int i;
 				for(i = 1; ppcols[i].ppcol; i++)	// skip first entry
+				{
 					if(!strcmp(argv[2], ppcols[i].name))
 					{
 						ppcol = ppcols[i].ppcol;
 						pPx = ppcols[i].pPx;
 						break;
 					}
+				}
 			}
 		}
 		if((xc = GetColor(X.disp, argv[1])) == -1)
@@ -4144,7 +4146,7 @@ int cmdLoadmodel(int argc, char **argv)
 			double y = atof(strtok(NULL, " "));
 			double z = atof(strtok(NULL, " "));
 
-			gstat.model.points = realloc(gstat.model.points, sizeof(*gstat.model.points) * (gstat.model.cpoints + 1));
+			gstat.model.points = remalloc(gstat.model.points, sizeof(*gstat.model.points) * (gstat.model.cpoints + 1));
 			gstat.model.points[gstat.model.cpoints].x = x;
 			gstat.model.points[gstat.model.cpoints].y = y;
 			gstat.model.points[gstat.model.cpoints].z = z;
@@ -4156,7 +4158,7 @@ int cmdLoadmodel(int argc, char **argv)
 			int a = atoi(strtok(NULL, " ")) - 1;
 			int b = atoi(strtok(NULL, " ")) - 1;
 
-			gstat.model.lines = realloc(gstat.model.lines, sizeof(*gstat.model.lines) * (gstat.model.clines + 1));
+			gstat.model.lines = remalloc(gstat.model.lines, sizeof(*gstat.model.lines) * (gstat.model.clines + 1));
 			gstat.model.lines[gstat.model.clines][0] = a;
 			gstat.model.lines[gstat.model.clines][1] = b;
 			gstat.model.clines++;
@@ -5175,8 +5177,9 @@ void doTraffic(struct tagNode *node, bool show)
 {
 	struct tagTraffic *traf, **pptraf;
 
-	if(!node->parent || (gconf.globe && (node->cityindex < 0 || node->parent->cityindex < 0 || node->cityindex == node->parent->cityindex)))
+	if(!node->parent || (gconf.globe && (node->cityindex < 0 || node->parent->cityindex < 0 || node->cityindex == node->parent->cityindex))) {
 		show = FALSE;
+	}
 
 	for(traf = node->traffic, pptraf = &node->traffic; traf; )
 	{
@@ -5276,7 +5279,7 @@ void doTraffic(struct tagNode *node, bool show)
 			}
 		}else
 		{	// route next
-			// anyway, cutted out this traf.
+			// either reached or routed, cut out this traf from this node.
 			*pptraf = traf->next;
 			traf->time = gstat.ctime;
 
@@ -5284,6 +5287,7 @@ void doTraffic(struct tagNode *node, bool show)
 			{	// reached target
 				free(traf);
 			}else
+			{
 				if(!traf->isuplink && node->parent == &nroot)
 				{	// incoming to root, U-turn!
 					struct tagNode *nxnode;
@@ -5298,7 +5302,9 @@ void doTraffic(struct tagNode *node, bool show)
 						traf = NULL;
 					}
 					while(nxnode && nxnode->parent != &nroot)
+					{
 						nxnode = nxnode->parent;
+					}
 					if(!nxnode)
 					{
 						puts("traf-uturn: no parent");
@@ -5326,7 +5332,9 @@ void doTraffic(struct tagNode *node, bool show)
 							traf = NULL;
 						}
 						while(nxnode && nxnode->parent != node)
+						{
 							nxnode = nxnode->parent;
+						}
 						if(!nxnode)
 						{
 							puts("traf-next: no parent");
@@ -5344,9 +5352,10 @@ void doTraffic(struct tagNode *node, bool show)
 						nxnode->traffic = traf;
 					}
 				}
+			}
 
-				traf = *pptraf;
-				continue;
+			traf = *pptraf;
+			continue;
 		}
 		pptraf = &traf->next, traf = traf->next;
 	}
@@ -5758,7 +5767,7 @@ void initGlobe()
 		for(pts = ts + strlen(ts) - 1; pts >= ts && (*pts == '\n' || *pts == '\r'); pts--)
 			*pts = '\0';
 
-		gGlobe.cities = realloc(gGlobe.cities, sizeof(*gGlobe.cities) * (gGlobe.ccities + 1));
+		gGlobe.cities = remalloc(gGlobe.cities, sizeof(*gGlobe.cities) * (gGlobe.ccities + 1));
 
 		gGlobe.cities[gGlobe.ccities].x = atof(strtok(ts, "\t"));
 		gGlobe.cities[gGlobe.ccities].y = atof(strtok(NULL, "\t"));
@@ -5790,13 +5799,13 @@ void initGlobe()
 		if(!strcmp(ts, "b"))
 		{
 			gGlobe.ccoasts++;
-			gGlobe.coasts = realloc(gGlobe.coasts, sizeof(*gGlobe.coasts) * (gGlobe.ccoasts + 1));
+			gGlobe.coasts = remalloc(gGlobe.coasts, sizeof(*gGlobe.coasts) * (gGlobe.ccoasts + 1));
 			gGlobe.coasts[gGlobe.ccoasts].cpoints = 0;
 			gGlobe.coasts[gGlobe.ccoasts].pts = NULL;
 		}else
 		{
 			int po = gGlobe.coasts[gGlobe.ccoasts].cpoints;
-			gGlobe.coasts[gGlobe.ccoasts].pts = realloc(gGlobe.coasts[gGlobe.ccoasts].pts, sizeof(*gGlobe.coasts->pts) * (po + 1));
+			gGlobe.coasts[gGlobe.ccoasts].pts = remalloc(gGlobe.coasts[gGlobe.ccoasts].pts, sizeof(*gGlobe.coasts->pts) * (po + 1));
 			gGlobe.coasts[gGlobe.ccoasts].pts[po].x = atof(strtok(ts, " "));
 			gGlobe.coasts[gGlobe.ccoasts].pts[po].y = atof(strtok(NULL, " "));
 			gGlobe.coasts[gGlobe.ccoasts].cpoints++;
@@ -5822,13 +5831,13 @@ void initGlobe()
 		if(!strcmp(ts, "b"))
 		{
 			gGlobe.cinterns++;
-			gGlobe.interns = realloc(gGlobe.interns, sizeof(*gGlobe.interns) * (gGlobe.cinterns + 1));
+			gGlobe.interns = remalloc(gGlobe.interns, sizeof(*gGlobe.interns) * (gGlobe.cinterns + 1));
 			gGlobe.interns[gGlobe.cinterns].cpoints = 0;
 			gGlobe.interns[gGlobe.cinterns].pts = NULL;
 		}else
 		{
 			int po = gGlobe.interns[gGlobe.cinterns].cpoints;
-			gGlobe.interns[gGlobe.cinterns].pts = realloc(gGlobe.interns[gGlobe.cinterns].pts, sizeof(*gGlobe.interns->pts) * (po + 1));
+			gGlobe.interns[gGlobe.cinterns].pts = remalloc(gGlobe.interns[gGlobe.cinterns].pts, sizeof(*gGlobe.interns->pts) * (po + 1));
 			gGlobe.interns[gGlobe.cinterns].pts[po].x = atof(strtok(ts, " "));
 			gGlobe.interns[gGlobe.cinterns].pts[po].y = atof(strtok(NULL, " "));
 			gGlobe.interns[gGlobe.cinterns].cpoints++;
@@ -5849,13 +5858,15 @@ void initGlobe()
 		}
 		while(!feof(fp))
 		{
-			if(!fgets(ts, 1024, fp))
+			if(!fgets(ts, 1024, fp)) {
 				break;
+			}
 
-			for(pts = ts + strlen(ts) - 1; pts >= ts && (*pts == '\n' || *pts == '\r'); pts--)
+			for(pts = ts + strlen(ts) - 1; pts >= ts && (*pts == '\n' || *pts == '\r'); pts--) {
 				*pts = '\0';
+			}
 
-			gGlobe.ips = realloc(gGlobe.ips, sizeof(*gGlobe.ips) * (gGlobe.cips + 1));
+			gGlobe.ips = remalloc(gGlobe.ips, sizeof(*gGlobe.ips) * (gGlobe.cips + 1));
 			gGlobe.ips[gGlobe.cips].ip = parseIPString(strtok(ts, "\t"));
 			gGlobe.ips[gGlobe.cips].mask = htonl(~(atol(strtok(NULL, "\t")) - 1));
 			gGlobe.ips[gGlobe.cips].cid = -1;
@@ -5904,7 +5915,7 @@ void initGlobe()
 				{
 					for(j = 0; j < sizeof(sips) / sizeof(sips[0]); j++)
 					{
-						gGlobe.ips = realloc(gGlobe.ips, sizeof(*gGlobe.ips) * (gGlobe.cips + 1));
+						gGlobe.ips = remalloc(gGlobe.ips, sizeof(*gGlobe.ips) * (gGlobe.cips + 1));
 						gGlobe.ips[gGlobe.cips].ip = htonl(sips[j].ip);
 						gGlobe.ips[gGlobe.cips].mask = htonl(~sips[j].mask);
 						gGlobe.ips[gGlobe.cips].cid = i;
