@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <math.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -369,7 +370,7 @@ static int icmp_recv_probe (int sk, int revents, probe *probes, unsigned int num
 	    ) {
 			if (n < sizeof (struct ip) + sizeof (struct icmphdr))
 			{
-				printf("icmp_short(%d < %d+%d)\n", n, sizeof (struct ip), sizeof (struct icmphdr));
+				printf("icmp_short(%d < %zd+%zd)\n", n, sizeof (struct ip), sizeof (struct icmphdr));
 				/*
 				{
 					int i;
@@ -2819,7 +2820,7 @@ void saveRecursive(FILE *fp, struct tagNode *node)
 		if(!node->resolved)
 			name = "?";
 
-		fprintf(fp, "%c %08X %s %d %d %d %f %lld %lld\n"
+		fprintf(fp, "%c %08X %s %d %d %d %f %" PRIu64 " %" PRIu64 "\n"
 				, node->child ? 'N' : 'L'
 				, ntohl(node->ip)
 				, name
@@ -5273,7 +5274,7 @@ void doTraffic(struct tagNode *node, bool show)
 				if(gconf.showpktsize)
 				{
 					char ts[256];
-					int lts = sprintf(ts, "%d", traf->pktsize);
+					int lts = sprintf(ts, "%zd", traf->pktsize);
 					XDrawString(X.disp, X.pm, X.gc, x + r, y - 6, ts, lts);
 				}
 			}
@@ -5676,14 +5677,14 @@ void buildNetwork(struct tagNode *node, int ping, double astart, double aarea, i
 				if(!gconf.showbytes)
 					lts = sprintf(ts, "%d,%d", node->childs, node->leafs);
 				else
-					lts = sprintf(ts, "%lld", node->downbyte);
+					lts = sprintf(ts, "%zd", node->downbyte);
 				XQueryTextExtents(X.disp, X.font, ts, lts, &dir, &asc, &desc, &ova);
 				XDrawString(X.disp, X.pm, X.gc, nx - ova.width/2, cbound.top - 2, ts, lts);
 
 				if(!gconf.showbytes)
 					lts = sprintf(ts, "%d #%d", node->ping, hops - 1);
 				else
-					lts = sprintf(ts, "%lld", node->upbyte);
+					lts = sprintf(ts, "%zd", node->upbyte);
 				XQueryTextExtents(X.disp, X.font, ts, lts, &dir, &asc, &desc, &ova);
 				XDrawString(X.disp, X.pm, X.gc, nx - ova.width/2, cbound.top - 2 - 10, ts, lts);
 			}
