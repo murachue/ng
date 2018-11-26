@@ -5677,14 +5677,14 @@ void buildNetwork(struct tagNode *node, int ping, double astart, double aarea, i
 				if(!gconf.showbytes)
 					lts = sprintf(ts, "%d,%d", node->childs, node->leafs);
 				else
-					lts = sprintf(ts, "%zd", node->downbyte);
+					lts = sprintf(ts, "%" PRIu64, node->downbyte);
 				XQueryTextExtents(X.disp, X.font, ts, lts, &dir, &asc, &desc, &ova);
 				XDrawString(X.disp, X.pm, X.gc, nx - ova.width/2, cbound.top - 2, ts, lts);
 
 				if(!gconf.showbytes)
 					lts = sprintf(ts, "%d #%d", node->ping, hops - 1);
 				else
-					lts = sprintf(ts, "%zd", node->upbyte);
+					lts = sprintf(ts, "%" PRIu64, node->upbyte);
 				XQueryTextExtents(X.disp, X.font, ts, lts, &dir, &asc, &desc, &ova);
 				XDrawString(X.disp, X.pm, X.gc, nx - ova.width/2, cbound.top - 2 - 10, ts, lts);
 			}
