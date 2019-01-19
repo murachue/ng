@@ -51,22 +51,22 @@ prepdata: data/iplist.dat data/coastlines.dat data/international.dat data/cities
 
 data/iplist.dat: iplist/delegated-arin-extended-latest iplist/delegated-lacnic-latest iplist/delegated-apnic-latest iplist/delegated-ripencc-latest iplist/delegated-afrinic-latest
 	[ -d data ] || mkdir data
-	ruby mkiplist.rb iplist/delegated-*-latest > data/iplist.dat
+	ruby mkiplist.rb iplist/delegated-*-latest > $@.tmp && mv $@.tmp $@
 # note: land_polygons.shp from http://openstreetmapdata.com/data/land-polygons WGS84 projection,
 #       simplified using "Visvalingam/effective area" by 0.01% at https://mapshaper.org/
 #       Mercator projection shape can't be used because globe is sphere, not flat!!
 data/coastlines.dat: land_polygons.shp
 	[ -d data ] || mkdir data
 	#cp coastlines.dat data/
-	ruby shp2dat.rb $< > $@
+	ruby shp2dat.rb $< > $@.tmp && mv $@.tmp $@
 data/international.dat:
 	[ -d data ] || mkdir data
 	#cp international.dat data/
 	touch $@
 data/cities.dat: iplist/country_names_and_code_elements.txt cities.dat
 	[ -d data ] || mkdir data
-	ruby mkcities.rb $+ > $@
+	ruby mkcities.rb $+ > $@.tmp && mv $@.tmp $@
 
 # worldcities.csv from https://simplemaps.com/data/world-cities "Basic"
 cities.dat: worldcities.csv
-	ruby wcc2dat.rb $< > $@
+	ruby wcc2dat.rb $< > $@.tmp && mv $@.tmp $@
