@@ -5367,25 +5367,25 @@ void buildNetwork(struct tagNode *node, int ping, double astart, double aarea, i
 	char ts[64];
 	int lts;
 
-	int pleafs;
+	int pleafs; // pleafs used only when node->parent, so not initializing is ok.
 
 	if(node->parent)
 	{
 		struct tagNode *n;
 
 		pleafs = node->parent->leafs;
-		if(!node->parent->parent && gconf.bundle)
+		if(!node->parent->parent && gconf.bundle) // if i am a direct child of root, and bundle enabled...
 		{
-			for(n = node; n; n = n->next)
+			for(n = node; n; n = n->next) // from me, iterate all siblings,
 			{
-				if(!isShowableNode(n))
+				if(!isShowableNode(n)) // if it is not showable,
 				{
 					int l = n->leafs;
 
-					if(l == 0)
+					if(l == 0) // if zero, i am the one.
 						l = 1;
 
-					pleafs -= l;
+					pleafs -= l; // parent does not have these leaves... subtract.
 				}
 			}
 		}
@@ -5411,33 +5411,33 @@ void buildNetwork(struct tagNode *node, int ping, double astart, double aarea, i
 			if(p > gconf.maxping)
 				p = gconf.maxping;
 
-			if(l == 0)
+			if(l == 0) // if leaf node
 				l = 1;
 
-			deg = astart + (acc + l/2.0) / pleafs * aarea;
-			node->posinfo.deg = 1 - deg + 0.25;
+			deg = astart + (acc + l/2.0) / pleafs * aarea; // l/2.0: center. acc adv. by leafs, it effectively ranges by leafs in aarea.
+			node->posinfo.deg = 1 - deg + 0.25; // this is for autorotate in relative, but expr is from absolute...??
 			switch(gconf.posmode)
 			{
-			case 0:
+			case 0: // absolute
 				if(node != cnode || !gstat.cdragging)
 				{
-				node->posinfo.px = cos((1 - deg + 0.25) * 2 * M_PI) * (ping + p) + nroot.x;
-				node->posinfo.py = sin((1 - deg + 0.25) * 2 * M_PI) * (ping + p) + nroot.y;
+					node->posinfo.px = cos((1 - deg + 0.25) * 2 * M_PI) * (ping + p) + nroot.x;
+					node->posinfo.py = sin((1 - deg + 0.25) * 2 * M_PI) * (ping + p) + nroot.y;
 				}
 				deg += gconf.rotate;
 				x = cos(deg * 2 * M_PI) * (ping + p) + nroot.x;
 				y = sin(deg * 2 * M_PI) * (ping + p) + nroot.y;
 				if(node != cnode || !gstat.cdragging)
 				{
-				node->posinfo.x = x;
-				node->posinfo.y = y;
+					node->posinfo.x = x;
+					node->posinfo.y = y;
 				}
 				break;
-			case 1:
+			case 1: // relative
 				if(node != cnode || !gstat.cdragging)
 				{
-				node->posinfo.px = cos((1 - deg + 0.25) * 2 * M_PI) * (p) + node->parent->posinfo.x;
-				node->posinfo.py = sin((1 - deg + 0.25) * 2 * M_PI) * (p) + node->parent->posinfo.y;
+					node->posinfo.px = cos((1 - deg + 0.25) * 2 * M_PI) * (p) + node->parent->posinfo.x;
+					node->posinfo.py = sin((1 - deg + 0.25) * 2 * M_PI) * (p) + node->parent->posinfo.y;
 				}
 				deg += gconf.rotate;
 				x = cos(deg * 2 * M_PI) * (p) + node->parent->posinfo.x;
@@ -5450,12 +5450,9 @@ void buildNetwork(struct tagNode *node, int ping, double astart, double aarea, i
 				break;
 			}
 
-			if(node != cnode || !gstat.cdragging)
-			{
-				if(!gconf.maxhop || hops <= gconf.maxhop + 1)
-				{
-					if(gconf.movemode == -1)
-					{
+			if(node != cnode || !gstat.cdragging) {
+				if(!gconf.maxhop || hops <= gconf.maxhop + 1) {
+					if(gconf.movemode == -1) {
 						int mc;
 						int nx, ny;
 
@@ -5469,19 +5466,19 @@ void buildNetwork(struct tagNode *node, int ping, double astart, double aarea, i
 						}
 						node->x = nx;
 						node->y = ny;
-					} else
-						if(gconf.movemode == 0)
-						{
+					} else {
+						if(gconf.movemode == 0) {
 							node->x = x;
 							node->y = y;
-						}else
-							if(gconf.movemode > 0)
-							{
+						}else{
+							if(gconf.movemode > 0) {
 								node->x = ((node->x)*(gconf.movemode - 1) + x) / gconf.movemode;
 								node->y = ((node->y)*(gconf.movemode - 1) + y) / gconf.movemode;
 							}
-				}else
-				{
+						}
+					}
+				} else {
+					// nonsense for now, but have mean for prepare to not-limit and "expanding animation" from parent.
 					node->x = posparent->x;
 					node->y = posparent->y;
 				}
@@ -5721,7 +5718,7 @@ void buildNetwork(struct tagNode *node, int ping, double astart, double aarea, i
 		{
 			if(!node->child)
 			{
-				acc++;
+				acc++; // TODO if !node->child, node->leafs==0?
 			}else
 				acc += node->leafs;
 		}
