@@ -2936,6 +2936,7 @@ void setCurNode(struct tagNode *node)
 
 // convenient funcs
 
+// TODO isdigit
 int isnumstr(const char *str)
 {
 	if(!str || !*str)
@@ -3329,7 +3330,7 @@ int cmdMinping(int argc, char **argv)
 		logstrf(0, "Ping min = %d", gconf.minping);
 	}else
 	{
-		if(isnumstr(argv[1]))
+		if(issignnumstr(argv[1]))
 		{
 			gconf.minping = atoi(argv[1]);
 			logstrf(0, "Ping min set to %d.", gconf.minping);
@@ -3346,7 +3347,7 @@ int cmdMaxping(int argc, char **argv)
 		logstrf(0, "Ping max = %d", gconf.maxping);
 	}else
 	{
-		if(isnumstr(argv[1]))
+		if(issignnumstr(argv[1]))
 		{
 			gconf.maxping = atoi(argv[1]);
 			logstrf(0, "Ping max set to %d.", gconf.maxping);
