@@ -1,5 +1,7 @@
 # ng: Network Graphicalizer
 
+![screenshot](img/ng_screenshot.png)
+
 ## How to build
 
 First, prepare coastlines data from somewhere.
